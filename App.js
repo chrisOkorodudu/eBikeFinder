@@ -33,7 +33,6 @@ export default class App extends Component {
 
     componentDidMount() {
         // this.startLocationTracking();
-        console.log('mounted');
         this.getStations();
         setInterval(() => {
             this.updateMarkers();
@@ -91,8 +90,15 @@ export default class App extends Component {
         const { stations, markers } = this.state;
 
         _.keys(stations).forEach(id => {
+            const exists = markers.find(marker => {
+                return marker.key === id;
+            });
+            if (exists) {
+                return;
+            }
+
             const station = stations[id];
-            const { name } = station;
+            const {name} = station;
             const location = {
                 latitude: station.latitude, 
                 longitude: station.longitude,
