@@ -10,6 +10,7 @@ import {
   AlertIOS
 } from 'react-native';
 import MapView, { Marker, AnimatedRegion, MarkerAnimated } from 'react-native-maps';
+import ListView from './components/ListView';
 import { getBikeData } from './bikeFinder';
 
 
@@ -117,40 +118,45 @@ export default class App extends Component {
         this.setState({
             markers
         });
+        console.log('updated');
     }
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <MapView
-          style={styles.map}
-          ref={ref => {this.map = ref;}}
-          initialRegion={{
-            latitude: 40.758896,
-            longitude: -73.985130,
-            latitudeDelta: LATITUDE_DELTA,
-            longitudeDelta: LONGITUDE_DELTA
-          }}
-        >
-        {this.state.markers}
-        </MapView>
-      </View>
-    );
-  }
+    render() {
+        return (
+            <View style={styles.container}>
+                <MapView
+                    style={styles.map}
+                    ref={ref => {this.map = ref;}}
+                        initialRegion={{
+                        latitude: 40.758896,
+                        longitude: -73.985130,
+                        latitudeDelta: LATITUDE_DELTA,
+                        longitudeDelta: LONGITUDE_DELTA
+                    }}
+                >
+                    {this.state.markers}
+                </MapView>
+                <ListView style={styles.stationList} stations={this.state.stations} />
+            </View>
+        );
+    }
 }
 
 const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-  },
-  map: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+    container: {
+        ...StyleSheet.absoluteFillObject,
+        alignItems: 'center',
+        flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+    },
+    map: {
+        // ...StyleSheet.absoluteFillObject,
+        width: '100%',
+        height: '67%',
+        top: 0,
+    },
+    stationList: { 
+    
+    }
 });
