@@ -10,11 +10,10 @@ import {
   AlertIOS
 } from 'react-native';
 import MapView, { Marker, AnimatedRegion, MarkerAnimated } from 'react-native-maps';
-import ListView from './components/ListView';
+import {ListView} from './components/ListView';
 import { getBikeData } from './bikeFinder';
 
-
-import _ from 'lodash';
+import _keys from 'lodash/keys';
 
 const screen = Dimensions.get('window');
 
@@ -37,8 +36,8 @@ export default class App extends Component {
         // this.startLocationTracking();
         this.getStations();
         setInterval(() => {
-            this.updateMarkers();
-        }, 10000)
+            this.getStations();
+        }, 5000)
     }
 
     startLocationTracking(cb) {
@@ -56,18 +55,17 @@ export default class App extends Component {
     getStations() {
 
         const {stations} = this.state;
-        const scope = this;
+        const $ = this;
         getBikeData(stations)
             .then(stationMap => {
                 //remove marker if no more ebikes at station
-                _.keys(stations).forEach(id => {
+                _keys(stations).forEach(id => {
                     if (stationMap[id].ebikes < 1) {
-                        stations[id].setMap(null);
-                        delete station[id];
+                        delete stations[id];
                     }
                 });
 
-                _.keys(stationMap).forEach(id => {
+                _keys(stationMap).forEach(id => {
                     const station = stationMap[id];
                     if (!stations.id && station.ebikes > 0) {
                         stations[id] = stationMap[id];
@@ -76,10 +74,10 @@ export default class App extends Component {
                     }
                 });
 
-                scope.setState({
+                $.setState({
                     stations
                 }, () => {
-                    scope.updateMarkers();
+                    $.updateMarkers();
                 });
             })
             .catch(error => {
@@ -91,7 +89,7 @@ export default class App extends Component {
         //station => marker logic
         const { stations, markers } = this.state;
 
-        _.keys(stations).forEach(id => {
+        _keys(stations).forEach(id => {
             const exists = markers.find(marker => {
                 return marker.key === id;
             });
@@ -107,7 +105,7 @@ export default class App extends Component {
             };
             const marker = (
                 <MarkerAnimated
-                    onPress={this.handlePress(id)}
+                    onPress={() => this.handlePress(id)}
                     key={id}
                     identifier={id}
                     coordinate={location}
@@ -118,7 +116,7 @@ export default class App extends Component {
         });
 
         this.setState({
-            markers
+            markers: markers
         });
         console.log('updated');
     }
@@ -130,19 +128,19 @@ export default class App extends Component {
     render() {
         return (
             <View style={styles.container}>
-                <MapView
-                    style={styles.map}
-                    ref={ref => {this.map = ref;}}
-                        initialRegion={{
-                        latitude: 40.758896,
-                        longitude: -73.985130,
-                        latitudeDelta: LATITUDE_DELTA,
-                        longitudeDelta: LONGITUDE_DELTA
-                    }}
-                >
-                    {this.state.markers}
-                </MapView>
-                <ListView style={styles.stationList} stations={this.state.stations} currentStation={this.state.currentStation} />
+                    <MapView
+                        style={styles.map}
+                        ref={ref => {this.map = ref;}}
+                            initialRegion={{
+                            latitude: 40.758896,
+                            longitude: -73.985130,
+                            latitudeDelta: LATITUDE_DELTA,
+                            longitudeDelta: LONGITUDE_DELTA
+                        }}
+                    >
+                        {this.state.markers}
+                    </MapView>
+                    <ListView style={styles.stationList} stations={this.state.stations} currentStation={this.state.currentStation} />
             </View>
         );
     }
@@ -159,10 +157,10 @@ const styles = StyleSheet.create({
     map: {
         // ...StyleSheet.absoluteFillObject,
         width: '100%',
-        height: '67%',
+        height: '55%',
         top: 0,
     },
     stationList: { 
-    
+        position: 'absolute'
     }
 });

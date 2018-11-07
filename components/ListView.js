@@ -13,21 +13,44 @@ import _keys from 'lodash/keys';
 import _findIndex from 'lodash/findIndex';
 
 
-class ListView extends Component {
+export class ListView extends Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            stationList: this.getStations(),
-            selectedStation: this.getSelectedStation(props.currentStation)
+            stationList: [],
+            selectedStation: null,
+            updated: false
         }
         this.scrollView = null;
     }
 
+    // componentDidUpdate() {
+    //     if (_keys(this.props.stations).length > 0 && !this.state.updated) {
+    //         this.getStations();
+    //         this.setState({updated: true});
+    //     }
+    //     const selectedStation = this.getSelectedStation(this.props.currentStation);
+    //     this.setState({selectedStation: selectedStation});
+    // }
+
+    componentWillReceiveProps() {
+        if (_keys(this.props.stations).length > 0) {
+            this.getStations();
+        }
+        const selectStation = this.getSelectedStation(this.props.currentStation);
+        console.log(selectStation);
+        if (selectStation !== this.state.selectedStation) {
+            this.setState({selectedStation: selectStation});
+            this.hightlightStation();
+        }
+        
+        
+    }
 
     getSelectedStation(stationId) {
         if (stationId) {
-            return _findIndex(_keys(stations), (id) => id === currentStation);
+            return _findIndex(_keys(this.props.stations), (id) => id === stationId);
         }
         return null;
     }
@@ -46,18 +69,37 @@ class ListView extends Component {
             )
         });
 
-        return stationList;
+       this.setState({stationList: stationList});
+
     }
 
-    scrollToStation() {
-        if (this.state.selectedStation) {
-            this.scrollView.scrollTo(this.state.selectedStation);
+    // seems like this would need to involve complex ref tag logic, 
+    // easier option may be to swap selected station for first element in list, re-render with it at the top 
+    // scrollToStation() {
+    //     if (this.state.selectedStation) {
+    //         this.scrollView.scrollTo({y: this.selectedStation * 22 + 300, animated: true});
+    //         console.log('scrolling');
+    //     }
+    // }
+    hightlightStation() {
+        const {stationList, selectedStation} = this.state;
+        if (selectedStation) {
+            console.log('here');
+            const station = stationList[selectedStation];
+            stationList[selectedStation] = (
+                <View style={styles.selectedStation} key={this.props.currentStation}>
+                    <Text style={styles.name}>{station.name}</Text><Text style={styles.bikes}>{station.ebikes}</Text>
+                </View>
+            );
+            this.setState({stationList}, () => {
+                console.log(this.state.stationList);
+            });
+
         }
+        
     }
 
-    
     render() {
-        console.log(this.state.stationList);
         let numBikes = 0;
         const stations = this.props.stations;
         _keys(stations).forEach(key => {
@@ -66,7 +108,6 @@ class ListView extends Component {
         const header = `There are ${_keys(stations).length} stations with an electric bike right now: (${numBikes} bikes total)`;
         return (
             <ScrollView 
-                onLayout={() => {this.scrollToStation()}}
                 ref={scrollView => this.scrollView = scrollView}
                 contentContainerStyle={styles.list}
             >
@@ -95,13 +136,22 @@ const styles = StyleSheet.create({
     station: {
         flex: 1, 
         flexDirection: 'row',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        height: 22
     },
     stationDark: {
         flex: 1,
         flexDirection: 'row',
         justifyContent: 'space-between',
         backgroundColor: 'lightblue',
+        height: 22
+    },
+    selectedStation: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: 'orange',
+        height: 30
     },
     name: {
         marginLeft: 10,
@@ -115,5 +165,3 @@ const styles = StyleSheet.create({
         fontSize: 18,
     }
 });
-
-export default ListView;
