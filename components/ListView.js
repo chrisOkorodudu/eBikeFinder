@@ -10,34 +10,76 @@ import {
 } from 'react-native';
 
 import _keys from 'lodash/keys';
+import _findIndex from 'lodash/findIndex';
 
 
-const ListView = ({stations}) => {
-    let numBikes = 0;
-    _keys(stations).forEach(key => {
-        numBikes += stations[key].ebikes;
-    });
+class ListView extends Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            stationList: this.getStations(),
+            selectedStation: this.getSelectedStation(props.currentStation)
+        }
+        this.scrollView = null;
+    }
+
+
+    getSelectedStation(stationId) {
+        if (stationId) {
+            return _findIndex(_keys(stations), (id) => id === currentStation);
+        }
+        return null;
+    }
+
+    getStations() {
+        const stations = this.props.stations;
+        let i = 0;
+        const stationList = _keys(stations).map(key => {
+            const station = stations[key];
+            i++;
+
+            return (
+                <View style={i % 2 == 0 ? styles.station : styles.stationDark} key={key}>
+                    <Text style={styles.name}>{station.name}</Text><Text style={styles.bikes}>{station.ebikes}</Text>
+                </View>
+            )
+        });
+
+        return stationList;
+    }
+
+    scrollToStation() {
+        if (this.state.selectedStation) {
+            this.scrollView.scrollTo(this.state.selectedStation);
+        }
+    }
 
     
-    const header = `There are ${_keys(stations).length} stations with an electric bike right now: (${numBikes} bikes total)`;
-    let counter = 0;
-    const stationList = _keys(stations).map(key => {
-        const station = stations[key];
-        counter++;
+    render() {
+        console.log(this.state.stationList);
+        let numBikes = 0;
+        const stations = this.props.stations;
+        _keys(stations).forEach(key => {
+            numBikes += stations[key].ebikes;
+        });
+        const header = `There are ${_keys(stations).length} stations with an electric bike right now: (${numBikes} bikes total)`;
         return (
-            <View style={counter % 2 == 0 ? styles.station : styles.stationDark} key={key}>
-                <Text style={styles.name}>{station.name}</Text><Text style={styles.bikes}>{station.ebikes}</Text>
-            </View>
+            <ScrollView 
+                onLayout={() => {this.scrollToStation()}}
+                ref={scrollView => this.scrollView = scrollView}
+                contentContainerStyle={styles.list}
+            >
+                    <Text style={styles.header}>{header}</Text>
+                    {this.state.stationList}
+            </ScrollView>
         )
-    });
-    return (
-        <ScrollView contentContainerStyle={styles.list}>
-            <Text style={styles.header}>{header}</Text>
-            {stationList}
-        </ScrollView>
-    )
+    }
+        
 }
 
+
+//Styles
 const styles = StyleSheet.create({
     list: {
         position: 'relative',

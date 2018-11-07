@@ -28,7 +28,8 @@ export default class App extends Component {
         super();
         this.state = {
             stations: {}, 
-            markers: []
+            markers: [],
+            currentStation: null
         };
     }
 
@@ -106,6 +107,7 @@ export default class App extends Component {
             };
             const marker = (
                 <MarkerAnimated
+                    onPress={this.handlePress(id)}
                     key={id}
                     identifier={id}
                     coordinate={location}
@@ -119,6 +121,10 @@ export default class App extends Component {
             markers
         });
         console.log('updated');
+    }
+
+    handlePress(id) {
+        this.setState({currentStation: id})
     }
 
     render() {
@@ -136,7 +142,7 @@ export default class App extends Component {
                 >
                     {this.state.markers}
                 </MapView>
-                <ListView style={styles.stationList} stations={this.state.stations} />
+                <ListView style={styles.stationList} stations={this.state.stations} currentStation={this.state.currentStation} />
             </View>
         );
     }
