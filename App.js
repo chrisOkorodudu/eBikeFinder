@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import MapView, { Marker, AnimatedRegion, MarkerAnimated } from 'react-native-maps';
 import {ListView} from './components/ListView';
+import ListViewStatic from './components/ListViewStatic';
 import { getBikeData } from './bikeFinder';
 
 import _keys from 'lodash/keys';
@@ -126,6 +127,7 @@ export default class App extends Component {
     }
 
     render() {
+        console.log(this.state.currentStation);
         return (
             <View style={styles.container}>
                     <MapView
@@ -140,7 +142,7 @@ export default class App extends Component {
                     >
                         {this.state.markers}
                     </MapView>
-                    <ListView style={styles.stationList} stations={this.state.stations} currentStation={this.state.currentStation} />
+                    <ListViewStatic style={styles.stationList} stations={this.state.stations} currentStation={this.state.currentStation} />
             </View>
         );
     }

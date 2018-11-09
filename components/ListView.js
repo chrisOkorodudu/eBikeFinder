@@ -38,14 +38,13 @@ export class ListView extends Component {
         if (_keys(this.props.stations).length > 0) {
             this.getStations();
         }
-        const selectStation = this.getSelectedStation(this.props.currentStation);
-        console.log(selectStation);
-        if (selectStation !== this.state.selectedStation) {
-            this.setState({selectedStation: selectStation});
-            this.hightlightStation();
+        const stationIndex = this.getSelectedStation(this.props.currentStation);
+        console.log(stationIndex);
+        if (stationIndex !== this.state.selectedStation) {
+            console.log('in if', stationIndex);
+            this.setState({selectedStation: stationIndex}, this.hightlightStation());
+            console.log(this.state.stationIndex);
         }
-        
-        
     }
 
     getSelectedStation(stationId) {
@@ -83,8 +82,8 @@ export class ListView extends Component {
     // }
     hightlightStation() {
         const {stationList, selectedStation} = this.state;
+        console.log('in method', selectedStation);
         if (selectedStation) {
-            console.log('here');
             const station = stationList[selectedStation];
             stationList[selectedStation] = (
                 <View style={styles.selectedStation} key={this.props.currentStation}>
@@ -92,11 +91,10 @@ export class ListView extends Component {
                 </View>
             );
             this.setState({stationList}, () => {
-                console.log(this.state.stationList);
+                console.log(this.state.stationList[selectedStation]);
             });
 
         }
-        
     }
 
     render() {
@@ -106,6 +104,7 @@ export class ListView extends Component {
             numBikes += stations[key].ebikes;
         });
         const header = `There are ${_keys(stations).length} stations with an electric bike right now: (${numBikes} bikes total)`;
+        console.log(this.state.selectedStation ? this.state.stationList[this.state.selectedStation].props : 'nothing');
         return (
             <ScrollView 
                 ref={scrollView => this.scrollView = scrollView}
