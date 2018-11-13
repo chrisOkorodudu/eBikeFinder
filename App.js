@@ -27,6 +27,7 @@ export default class App extends Component {
     constructor() {
         super();
         this.state = {
+            currentLocation: null,
             stations: {}, 
             markers: [],
             currentStation: null
@@ -39,6 +40,10 @@ export default class App extends Component {
         setInterval(() => {
             this.getStations();
         }, 5000)
+
+        this.startLocationTracking(position => {
+            const { latitude, longitude } = position.coords;
+        })
     }
 
     startLocationTracking(cb) {
@@ -90,13 +95,17 @@ export default class App extends Component {
         //station => marker logic
         const { stations, markers } = this.state;
 
+        const updated = markers.filter(marker => stations[marker.key] !== undefined);
+
         _keys(stations).forEach(id => {
-            const exists = markers.find(marker => {
+            const exists = updated.find(marker => {
                 return marker.key === id;
             });
+
             if (exists) {
                 return;
             }
+            
 
             const station = stations[id];
             const {name} = station;
@@ -113,13 +122,12 @@ export default class App extends Component {
                     title={name}
                 />
             )
-            markers.push(marker);
+            updated.push(marker);
         });
 
         this.setState({
-            markers: markers
+            markers: updated
         });
-        console.log('updated');
     }
 
     handlePress(id) {
@@ -127,7 +135,6 @@ export default class App extends Component {
     }
 
     render() {
-        console.log(this.state.currentStation);
         return (
             <View style={styles.container}>
                     <MapView
