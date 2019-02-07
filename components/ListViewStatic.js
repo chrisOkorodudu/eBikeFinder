@@ -13,9 +13,7 @@ import _keys from 'lodash/keys';
 import _findIndex from 'lodash/findIndex';
 
 
-const ListViewStatic = ({stations, currentStation}) => {
-
-    console.log(currentStation);
+const ListViewStatic = ({stations, currentStation, numStations, numBikes}) => {
 
     const stationList = _keys(stations).map(key => {
         const station = stations[key];
@@ -27,12 +25,7 @@ const ListViewStatic = ({stations, currentStation}) => {
         )
     });
 
-    let numBikes = 0;
-
-    _keys(stations).forEach(key => {
-        numBikes += stations[key].ebikes;
-    });
-    const header = `There are ${_keys(stations).length} stations with an electric bike right now: (${numBikes} bikes total)`;
+    const header = `There are ${numStations} stations with an electric bike right now: (${numBikes} bikes total)`;
 
     return (
         <ScrollView contentContainerStyle={styles.list}>
