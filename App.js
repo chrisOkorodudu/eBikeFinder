@@ -41,8 +41,17 @@ export default class App extends Component {
         };
     }
 
-    componentDidMount() {
+    /**
+     * immediately initialize station data/markers
+     */
+    componentWillMount() {
         this.initializeStationData();
+    }
+
+    /**
+     * may not be necessary for this to go here
+     */
+    componentDidMount() {
         setInterval(() => {
             this.updateStations();
         }, 5000)
