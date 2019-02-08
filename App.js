@@ -42,35 +42,11 @@ export default class App extends Component {
     }
 
     componentDidMount() {
-        // this.startLocationTracking();
         this.initializeStationData();
         setInterval(() => {
             this.updateStations();
         }, 5000)
-        // this.watchLocation();
     }
-
-    // startLocationTracking(cb) {
-    //     navigator.geolocation.watchPosition(
-    //         cb,
-    //         error => console.log(error),
-    //         {
-    //             enableHighAccuracy: true,
-    //             timeout: 20000,
-    //             maximumAge: 1000
-    //         }
-    //     );
-    // }
-
-    // watchLocation() {
-    //     navigator.geolocation.watchPosition((position) => {
-    //         const myLastPosition = this.state.currentLocation;
-    //         const currentLocation = position.coords;
-    //         if (!isEqual(currentLocation, myLastPosition)) {
-    //             this.setState({ currentLocation });
-    //         }
-    //     }, null, this.props.geolocationOptions);
-    // }
 
     /**
      * retrieve station data (name, id, location, etc) from API call, store in state
@@ -189,6 +165,7 @@ export default class App extends Component {
             <View style={styles.container}>
                     <MapView
                         style={styles.map}
+                        showsUserLocation={true}
                         ref={ref => {this.map = ref;}}
                             initialRegion={{
                             latitude: 40.758896,
@@ -198,15 +175,14 @@ export default class App extends Component {
                         }}
                     >
                         {markerList}
-                        <Marker 
-                            identifier={PERSON_ID}
-                            coordinate={this.state.currentLocation}
-                            title='you are here'
-                            {...this.props}
-                        />
-
                     </MapView>
-                    <ListViewStatic style={styles.stationList} stations={this.state.stations} numStations={numStations} numBikes={numBikes} currentStation={this.state.currentStation} />
+                    <ListViewStatic 
+                        style={styles.stationList} 
+                        stations={this.state.stations} 
+                        numStations={numStations} 
+                        numBikes={numBikes} 
+                        currentStation={this.state.currentStation} 
+                    />
             </View>
         );
     }

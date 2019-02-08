@@ -15,7 +15,7 @@ import _findIndex from 'lodash/findIndex';
 
 const ListViewStatic = ({stations, currentStation, numStations, numBikes}) => {
 
-    const stationList = _keys(stations).map(key => {
+    const stationList = _keys(stations).filter(id => stations[id].ebikes > 0).map(key => {
         const station = stations[key];
 
         return (
