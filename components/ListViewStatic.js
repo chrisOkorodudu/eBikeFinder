@@ -1,19 +1,9 @@
 import React, {Component} from 'react';
-import {
-    StyleSheet,
-    View,
-    Text,
-    ScrollView,
-    Dimensions,
-    TouchableOpacity,
-    AlertIOS
-} from 'react-native';
+import { StyleSheet, View, Text, ScrollView } from 'react-native';
 
 import _keys from 'lodash/keys';
-import _findIndex from 'lodash/findIndex';
 
-
-const ListViewStatic = ({stations, currentStation, numStations, numBikes}) => {
+const ListView = ({stations, currentStation, numStations, numBikes}) => {
 
     const stationList = _keys(stations).filter(id => stations[id].ebikes > 0).map(key => {
         const station = stations[key];
@@ -35,7 +25,7 @@ const ListViewStatic = ({stations, currentStation, numStations, numBikes}) => {
     );
 };
 
-export default ListViewStatic;
+export default ListView;
 
 
 //Styles

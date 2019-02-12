@@ -14,10 +14,6 @@ function getStationData() {
             const stationMap = {}
             const stations = results[0].data.stations;
             const stationStatus = results[1].data.stations;
-
-            // lodash may contain way to merge objects in one pass, for now simple hash join is being used
-            // const merged = _.merge(_.keyBy(stations, 'station_id'), _.keyBy(stationStatus, 'ObjId'));
-            // var result = _.values(merged);
             
             stations.forEach(station => {
                 stationMap[station.station_id] = {

@@ -1,18 +1,17 @@
 
 import React, {Component} from 'react';
-import { StyleSheet, View, Text, Dimensions, PanResponder, Animated, TouchableOpacity, AlertIOS } from 'react-native';
-import MapView, { Marker, AnimatedRegion, MarkerAnimated } from 'react-native-maps';
+import { StyleSheet, View, Text, Dimensions, PanResponder, Animated } from 'react-native';
+import MapView, { MarkerAnimated } from 'react-native-maps';
 import ListViewStatic from './components/ListViewStatic';
 import { getStationData, updateStationData } from './bikeFinder';
 
 import _keys from 'lodash/keys';
-import isEqual from 'lodash/isEqual';
 
 const screen = Dimensions.get('window');
 
 const ASPECT_RATIO = screen.width / screen.height;
-const LATITUDE_DELTA = 0.05; //???????
-const LONGITUDE_DELTA = LATITUDE_DELTA / ASPECT_RATIO; //?????
+const LATITUDE_DELTA = 0.05; 
+const LONGITUDE_DELTA = LATITUDE_DELTA / ASPECT_RATIO;
 const PERSON_ID = 'user'; //should generate GUID
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
