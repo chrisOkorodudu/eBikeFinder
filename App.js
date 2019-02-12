@@ -1,7 +1,7 @@
 
 import React, {Component} from 'react';
-import { StyleSheet, View, Text, Dimensions, PanResponder, Animated } from 'react-native';
-import MapView, { MarkerAnimated } from 'react-native-maps';
+import { StyleSheet, View, Text, Dimensions, PanResponder, Animated, TouchableOpacity } from 'react-native';
+import MapView, { Marker } from 'react-native-maps';
 import ListViewStatic from './components/ListViewStatic';
 import { getStationData, updateStationData } from './bikeFinder';
 
@@ -12,7 +12,6 @@ const screen = Dimensions.get('window');
 const ASPECT_RATIO = screen.width / screen.height;
 const LATITUDE_DELTA = 0.05; 
 const LONGITUDE_DELTA = LATITUDE_DELTA / ASPECT_RATIO;
-const PERSON_ID = 'user'; //should generate GUID
 const GEOLOCATION_OPTIONS = { enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 };
 
 const defaultProps = {
@@ -26,6 +25,7 @@ export default class App extends Component {
         this.state = {
             stations: {}, 
             markers: {},
+            refs: {},
             currentStation: null,
             // draggable window properties:
             offset: 0,
@@ -151,11 +151,10 @@ export default class App extends Component {
 
         const { stations, markers } = this.state;
 
-        _keys(stations).forEach(id => {
+        _keys(stations).forEach(id => {   
             if (stations[id].ebikes > 0 && !markers[id]) {
                 markers[id] = this.createMarker(id, stations[id]); 
             } else if (stations[id].ebikes == 0 && markers[id]) {
-                // may have to do something like marker.setMap(null)
                 delete markers[id]
             }
         });
@@ -175,25 +174,57 @@ export default class App extends Component {
         }
 
         return (
-            <MarkerAnimated
-                onPress={() => this.handlePress(id)}
+            <Marker
+                onPress={() => this.handleMarkerPress(id)}
                 key={id}
                 identifier={id}
                 coordinate={location}
-                title={station.name + ', ' +  station.ebikes}
+                title={station.name + ' - ' +  station.ebikes}
+                ref={ref => { if (ref) { 
+                    this.state.refs[id] = ref
+                    this.setState({ refs: this.state.refs });
+                }}}
             />
-        )
+        );
     }
 
-    handlePress(id) {
+    /**
+     * sets current station in state to marker that was pressed
+     * @param id 
+     */
+    handleMarkerPress(id) {
         this.setState({currentStation: id})
     }
+
+    /**
+     * displays marker title of selected station
+     * @param id 
+     */
+    handleStationPress(id) {
+        // for some reason showCallout method only available through ref
+        if (this.state.refs[id]) {
+            this.state.refs[id].showCallout();
+        }
+    }
+
+
 
     render() {
         // cannot render object, must convert markers to array
         const markerList = _keys(this.state.markers).map(key => {
             return this.state.markers[key]
         });
+
+        // create text representation of stations, to pass as prop to ListView
+        const stationText = _keys(this.state.stations).filter(key => this.state.stations[key].ebikes > 0).map(key => {
+            const station = this.state.stations[key];
+            return (
+                <TouchableOpacity onPress={() => {this.handleStationPress(key)}} style={key === this.currentStation ? styles.selectedStation : styles.station} key={key}>
+                    <Text style={styles.name}>{station.name}</Text><Text style={styles.bikes}>{station.ebikes}</Text>
+                </TouchableOpacity>
+            )
+        });
+
 
         // calculate ebike numbers here as opposed to passing markers as prop
         const { stations, markers } = this.state;
@@ -235,10 +266,9 @@ export default class App extends Component {
                 <Animated.View style={[{minHeight: 40}, {height: this.state.bottomHeight}]} >
                     <ListViewStatic 
                         style={styles.stationList} 
-                        stations={this.state.stations} 
                         numStations={numStations} 
-                        numBikes={numBikes} 
-                        currentStation={this.state.currentStation} 
+                        numBikes={numBikes}  
+                        stations={stationText}
                     />
                 </Animated.View>
             </View>
@@ -257,6 +287,38 @@ const styles = StyleSheet.create({
     },
     stationList: { 
         // position: 'absolute'
+    },
+    station: {
+        flex: 1, 
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderBottomColor: 'black',
+        borderRadius: 5,
+        borderBottomWidth: 1,
+    },
+    stationDark: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: 'lightblue',
+        height: 22
+    },
+    selectedStation: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: 'orange',
+    },
+    name: {
+        marginLeft: 10,
+        maxWidth: 250,
+        fontSize: 16,
+        textAlign: 'left',
+        padding: 3,
+    },
+    bikes: {
+        marginRight: 10,
+        fontSize: 18,
     }
 });
 
