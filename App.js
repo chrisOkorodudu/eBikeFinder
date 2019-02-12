@@ -1,16 +1,7 @@
 
 import React, {Component} from 'react';
-// import {Platform, StyleSheet, Text, View} from 'react-native';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Dimensions,
-  TouchableOpacity,
-  AlertIOS
-} from 'react-native';
+import { StyleSheet, View, Text, Dimensions, PanResponder, Animated, TouchableOpacity, AlertIOS } from 'react-native';
 import MapView, { Marker, AnimatedRegion, MarkerAnimated } from 'react-native-maps';
-import {ListView} from './components/ListView';
 import ListViewStatic from './components/ListViewStatic';
 import { getStationData, updateStationData } from './bikeFinder';
 
@@ -34,10 +25,16 @@ export default class App extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            currentLocation: null,
             stations: {}, 
             markers: {},
-            currentStation: null
+            currentStation: null,
+            // draggable window properties:
+            offset: 0,
+            topHeight: 40,
+            bottomHeight: screen.height / 2,
+            deviceHeight: screen.height,
+            isDividerClicked: false,
+            pan: new Animated.ValueXY()
         };
     }
 
@@ -46,6 +43,7 @@ export default class App extends Component {
      */
     componentWillMount() {
         this.initializeStationData();
+        this.createPanResponder();
     }
 
     /**
@@ -55,6 +53,42 @@ export default class App extends Component {
         setInterval(() => {
             this.updateStations();
         }, 5000)
+    }
+
+    /**
+     * creates pan responder for divider
+     * All logic draggable divider taken from: 
+     * https://stackoverflow.com/questions/52527803/resizable-flex-layout-in-react-native
+     */
+    createPanResponder() {
+        this._panResponder = PanResponder.create({
+            onMoveShouldSetResponderCapture: () => true,
+            onMoveShouldSetPanResponderCapture: () => true,
+
+            // Initially, set the Y position offset when touch start
+            onPanResponderGrant: (e, gestureState) => {
+                this.setState({
+                    offset: e.nativeEvent.pageY,
+                    isDividerClicked: true
+                })
+            },
+
+            // When we drag the divider, set the bottomHeight (component state) again.
+            onPanResponderMove: (e, gestureState) => {
+                this.setState({
+                    bottomHeight: gestureState.moveY > (this.state.deviceHeight - 40) ? 40 : this.state.deviceHeight - gestureState.moveY,
+                    offset: e.nativeEvent.pageY
+                })
+            },
+
+            onPanResponderRelease: (e, gestureState) => {
+                // Do something here for the touch end event
+                this.setState({
+                    offset: e.nativeEvent.pageY,
+                    isDividerClicked: false
+                })
+            }
+        });
     }
 
     /**
@@ -172,6 +206,9 @@ export default class App extends Component {
 
         return (
             <View style={styles.container}>
+
+                {/* Top View: Map*/}
+                <Animated.View style={[{minHeight: 40, flex: 1}, {height: this.state.topHeight}]} >
                     <MapView
                         style={styles.map}
                         showsUserLocation={true}
@@ -185,6 +222,18 @@ export default class App extends Component {
                     >
                         {markerList}
                     </MapView>
+                </Animated.View>
+
+                {/* Divider */}
+                <View 
+                    style={[{height: 12}, this.state.isDividerClicked ? {backgroundColor: '#666'} : {backgroundColor: '#e2e2e2'}]} 
+                    {...this._panResponder.panHandlers}
+                >
+                    <Text style={{color: 'darkgrey', textAlign: 'center', marginTop: 3, lineHeight: 10}}> ≡≡ </Text>
+                </View>
+
+                {/* Bottom View: Station List */}
+                <Animated.View style={[{minHeight: 40}, {height: this.state.bottomHeight}]} >
                     <ListViewStatic 
                         style={styles.stationList} 
                         stations={this.state.stations} 
@@ -192,6 +241,7 @@ export default class App extends Component {
                         numBikes={numBikes} 
                         currentStation={this.state.currentStation} 
                     />
+                </Animated.View>
             </View>
         );
     }
@@ -199,20 +249,15 @@ export default class App extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        ...StyleSheet.absoluteFillObject,
-        alignItems: 'center',
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'space-between',
     },
     map: {
-        // ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFillObject,
         width: '100%',
-        height: '55%',
-        top: 0,
     },
     stationList: { 
-        position: 'absolute'
+        // position: 'absolute'
     }
 });
 
